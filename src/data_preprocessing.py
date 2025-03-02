@@ -66,6 +66,7 @@ def preprocess_df(df, text_column='text', target_column='target'):
         
         # Apply text transformation to the specified text column
         df.loc[:, text_column] = df[text_column].apply(transform_text)
+        df['text'] = df['text'].fillna("")
         logger.debug('Text column transformed')
         return df
     
@@ -75,6 +76,15 @@ def preprocess_df(df, text_column='text', target_column='target'):
     except Exception as e:
         logger.error('Error during text normalization: %s', e)
         raise
+
+def save_data(train_data:pd.DataFrame, test_data:pd.DataFrame, train_path:str, test_path:str) -> None:
+    try:
+        train_data.to_csv(train_path, index=False)
+        test_data.to_csv(test_path, index=False)
+        logger.debug('File saved successfully')
+    except:
+        logger.error('Excpetion raised during file saving')
+    
 
 def main(text_column='text', target_column='target'):
     """
@@ -93,9 +103,11 @@ def main(text_column='text', target_column='target'):
         # Store the data inside data/processed
         data_path = os.path.join("./data", "interim")
         os.makedirs(data_path, exist_ok=True)
+        train_file_path = os.path.join(data_path, "train_processed.csv")
+        test_file_path = os.path.join(data_path, "test_processed.csv")
         
-        train_processed_data.to_csv(os.path.join(data_path, "train_processed.csv"), index=False)
-        test_processed_data.to_csv(os.path.join(data_path, "test_processed.csv"), index=False)
+        #save files
+        save_data(train_processed_data, test_processed_data, train_file_path, test_file_path)
         
         logger.debug('Processed data saved to %s', data_path)
     except FileNotFoundError as e:
